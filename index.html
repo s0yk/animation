@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>복합지원 아이콘 – 동시에 등장·동일 모션·무한 idle</title>
+        <style>
+            :root {
+                /* 간단 값(필요하면 clamp로 바꾸세요) */
+                --chip-h: 70px;
+                --chip-px: 28px;
+                --icon-size: 84px;
+                --rise: 100px; /* 위로 올라갈 높이 */
+                --spread: 20px; /* 좌우 간격 */
+
+                --chip-bg: #3b6bf6;
+                --chip-fg: #fff;
+
+                /* 애니메이션 파라미터 */
+                --in-dur: 2.6s; /* 등장 속도(느리게) */
+                --overshoot: 1.03; /* 살짝 넘겼다 안착 */
+                --idle-range: 6px; /* 위/아래 미세 진폭 */
+                --idle-dur: 6.5s; /* idle 속도(느리게) */
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+                height: 100vh;
+                display: grid;
+                place-items: center;
+            }
+
+            .combo {
+                position: relative;
+                display: grid;
+                place-items: center;
+                gap: 32px;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .chip {
+                height: var(--chip-h);
+                padding: 0 var(--chip-px);
+                background: var(--chip-bg);
+                color: var(--chip-fg);
+                border-radius: 9999px;
+                font-weight: 700;
+                font-size: 22px;
+                box-shadow: 0 10px 20px rgba(46, 87, 214, 0.25);
+                user-select: none;
+            }
+
+            .icons {
+                position: relative;
+                width: 100%;
+                height: 0;
+                display: flex;
+            }
+
+            .icon {
+                /* position: absolute; */
+                left: 50%;
+                top: 0;
+                width: var(--icon-size);
+                height: var(--icon-size);
+                /* transform: translate(-50%, -50%) translate(0, 0) scale(0.9); */
+                opacity: 0;
+                filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.12));
+                will-change: transform, opacity;
+                backface-visibility: hidden;
+
+                /* 모두 완전히 동일한 애니메이션과 타이밍 */
+                animation: popIn var(--in-dur) 0s both, idleFloat var(--idle-dur) var(--in-dur) ease-in-out infinite alternate;
+            }
+            .icon img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+
+            /* 최종 위치 변수 – 세 개 모두 같은 규칙 */
+            .icon--left {
+                --tx: calc(-1 * var(--spread));
+                --ty: calc(-1 * var(--rise));
+            }
+            .icon--mid {
+                --tx: 0px;
+                --ty: calc(-1 * var(--rise));
+            } /* ★ 중앙도 동일 */
+            .icon--right {
+                --tx: var(--spread);
+                --ty: calc(-1 * var(--rise));
+            }
+
+            /* 1) 동시에 ‘톡’ 등장(사라지지 않음) */
+            @keyframes popIn {
+                0% {
+                    opacity: 0;
+                    transform: translate(0, -50%) translate(0, 0) scale(0.9) rotate(-0.3deg);
+                    animation-timing-function: cubic-bezier(0.2, 0.6, 0.2, 1.25);
+                }
+                60% {
+                    opacity: 1;
+                    transform: translate(0, -50%) translate(calc(var(--tx) * var(--overshoot)), calc(var(--ty) * var(--overshoot))) scale(1.015) rotate(0.05deg);
+                    animation-timing-function: cubic-bezier(0.16, 0.84, 0.29, 1);
+                }
+                100% {
+                    opacity: 1;
+                    transform: translate(0, -50%) translate(var(--tx), var(--ty)) scale(1) rotate(0deg);
+                }
+            }
+
+            /* 2) 보이는 상태에서만 미세하게 둥둥 – 절대 opacity 건드리지 않음 */
+            @keyframes idleFloat {
+                0% {
+                    transform: translate(0, -50%) translate(var(--tx), calc(var(--ty) + var(--idle-range))) scale(1);
+                }
+                100% {
+                    transform: translate(0, -50%) translate(var(--tx), calc(var(--ty) - var(--idle-range))) scale(1);
+                }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                .icon {
+                    animation: none !important;
+                    opacity: 1 !important;
+                    transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(1) !important;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <section class="combo" aria-label="복합지원 영역">
+            <div class="icons" aria-hidden="true">
+                <figure class="icon icon--left"><img src="images/1.svg" alt="" /></figure>
+                <figure class="icon icon--mid"><img src="images/2.svg" alt="" /></figure>
+                <figure class="icon icon--right"><img src="images/3.svg" alt="" /></figure>
+            </div>
+            <div class="chip">복합지원</div>
+        </section>
+    </body>
+</html>
